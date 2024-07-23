@@ -1,19 +1,20 @@
 // ==UserScript==
-// @name         YouTube-Ambient-Mode
+// @name         YouTube-Ambient-Mode-off
 // @namespace    http://tampermonkey.net/
-// @version      0.1
-// @description  try to take over the world!
-// @author       You
+// @version      0.2
+// @description  Моё расширение которое которое выключает "профессиональное освещение" он же "ambient mode" и ставит нормальное (на выбор) качество роликов на youtube
+// @author       Khvalimov Maksim
 // @match            *://*.youtube.com/*
+// @match            *://*m.youtube.com/*
 // @match            *://*.youtube-nocookie.com/*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=alternativeto.net
-// @run-at       document-idle
+// @icon         https://images.squarespace-cdn.com/content/v1/5a9dd11e2714e52449908751/1591907017940-3BU2VFMCN88O45KKK0O6/hd-youtube-logo-png-transparent-background-20.png
+// @run-at       document-end
 // @grant        none
 // ==/UserScript==
 
 (function() {
     'use strict';
-   //вырубить освещение на ютубе
+   //вырубить проф. освещение  ютуба на ПК
     var style = document.createElement("style");
     style.innerText = "#cinematics{display:none!important;}";
     document.head.appendChild(style);
@@ -22,7 +23,34 @@
     //Убрать окно которое напоминает о фоновой подствке
     //var okno = document.body.getElementByClassName(".style-scope.ytd-popup-container").style.display = "none";
 
+    //вырубить проф. освещение  ютуба на смартфоне
+    // Функция для отключения кинематографических функций
+    function disableCinematicFeatures() {
+        if (typeof ytcfg !== 'undefined') {
+            // Проверяем, существует ли объект ytcfg
+            const experimentFlags = ytcfg.get('EXPERIMENT_FLAGS');
+            if (experimentFlags) {
+                // Отключаем нужные флаги
+                experimentFlags.kevlar_watch_cinematics = false;
+                experimentFlags.mweb_cinematic_fullscreen = false;
+                experimentFlags.mweb_cinematic_topbar = false;
+                experimentFlags.mweb_cinematic_watch = false;
 
+                // Устанавливаем обновленные флаги обратно
+                ytcfg.set({
+                    "EXPERIMENT_FLAGS": experimentFlags
+                });
+
+                console.log('Кинематографические функции отключены.');
+            }
+        } else {
+            console.log('ytcfg не найден. Ожидание загрузки...');
+            setTimeout(disableCinematicFeatures, 500); // Повторная попытка через 500 мс
+        }
+    }
+
+    // Запускаем функцию после загрузки страницы
+    window.addEventListener('load', disableCinematicFeatures);
 
 
     //автоматическое качество ютуб
